@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+
+  postgres:
+    image: postgres:12.4-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    env_file: .env
+
+  redis:
+    image: redis:6.0.6-alpine
+    volumes:
+      - redis_data:/data
+    env_file: .env
+
+  app:
+    build: app
+    ports:
+      - '1323:1323'
+    depends_on:
+      - postgres
+      - redis
+
+volumes:
+
+  postgres_data:
+  redis_data:

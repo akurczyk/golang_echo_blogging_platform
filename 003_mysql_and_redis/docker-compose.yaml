@@ -1,0 +1,28 @@
+version: '3.7'
+
+services:
+
+  mysql:
+    image: mysql:8.0.21
+    volumes:
+      - mysql_data:/var/lib/mysql
+    env_file: .env
+
+  redis:
+    image: redis:6.0.6-alpine
+    volumes:
+      - redis_data:/data
+    env_file: .env
+
+  app:
+    build: app
+    ports:
+      - '1323:1323'
+    depends_on:
+      - mysql
+      - redis
+
+volumes:
+
+  mysql_data:
+  redis_data:

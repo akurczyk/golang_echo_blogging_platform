@@ -1,54 +1,54 @@
 package main
 
 import (
-	"github.com/go-playground/validator"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo-contrib/prometheus"
-	"github.com/labstack/echo/middleware"
+    "github.com/go-playground/validator"
+    "github.com/labstack/echo"
+    "github.com/labstack/echo-contrib/prometheus"
+    "github.com/labstack/echo/middleware"
 )
 
 type (
-	CustomValidator struct {
-		validator *validator.Validate
-	}
+    CustomValidator struct {
+        validator *validator.Validate
+    }
 )
 
 func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
+    return cv.validator.Struct(i)
 }
 
 func main() {
-	e := echo.New()
+    e := echo.New()
 
-	// Validator
-	e.Validator = &CustomValidator{validator: validator.New()}
+    // Validator
+    e.Validator = &CustomValidator{validator: validator.New()}
 
-	// Prometheus
-	p := prometheus.NewPrometheus("echo", nil)
-	p.Use(e)
+    // Prometheus
+    p := prometheus.NewPrometheus("echo", nil)
+    p.Use(e)
 
-	e.GET("/users", listUserAccounts)
-	e.POST("/users", createUserAccount)
-	e.GET("/users/:id", retrieveUserAccount)
-	e.PUT("/users", updateUserAccount, middleware.KeyAuth(checkAuthToken))
-	e.DELETE("/users", deleteUserAccount, middleware.KeyAuth(checkAuthToken))
+    e.GET("/users", listUserAccounts)
+    e.POST("/users", createUserAccount)
+    e.GET("/users/:id", retrieveUserAccount)
+    e.PUT("/users", updateUserAccount, middleware.KeyAuth(checkAuthToken))
+    e.DELETE("/users", deleteUserAccount, middleware.KeyAuth(checkAuthToken))
 
-	e.POST("/token", issueToken)
-	e.DELETE("/token", revokeToken, middleware.KeyAuth(checkAuthToken))
+    e.POST("/token", issueToken)
+    e.DELETE("/token", revokeToken, middleware.KeyAuth(checkAuthToken))
 
-	e.GET("/posts", listPosts)
-	e.POST("/posts", createPost, middleware.KeyAuth(checkAuthToken))
-	e.GET("/posts/:id", retrievePost)
-	e.PUT("/posts/:id", updatePost, middleware.KeyAuth(checkAuthToken))
-	e.DELETE("/posts/:id", deletePost, middleware.KeyAuth(checkAuthToken))
+    e.GET("/posts", listPosts)
+    e.POST("/posts", createPost, middleware.KeyAuth(checkAuthToken))
+    e.GET("/posts/:id", retrievePost)
+    e.PUT("/posts/:id", updatePost, middleware.KeyAuth(checkAuthToken))
+    e.DELETE("/posts/:id", deletePost, middleware.KeyAuth(checkAuthToken))
 
-	e.GET("/comments", listComments)
-	e.POST("/comments", createComment, middleware.KeyAuth(checkAuthToken))
-	e.GET("/comments/:id", retrieveComment)
-	e.PUT("/comments/:id", updateComment, middleware.KeyAuth(checkAuthToken))
-	e.DELETE("/comments/:id", deleteComment, middleware.KeyAuth(checkAuthToken))
+    e.GET("/comments", listComments)
+    e.POST("/comments", createComment, middleware.KeyAuth(checkAuthToken))
+    e.GET("/comments/:id", retrieveComment)
+    e.PUT("/comments/:id", updateComment, middleware.KeyAuth(checkAuthToken))
+    e.DELETE("/comments/:id", deleteComment, middleware.KeyAuth(checkAuthToken))
 
-	e.Logger.Fatal(e.Start(":1323"))
+    e.Logger.Fatal(e.Start(":1323"))
 }
 
 // TODO: Tests and Swagger

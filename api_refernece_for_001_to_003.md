@@ -1,6 +1,6 @@
 ## Users and authentication
 
-**```> http GET http://127.0.0.1:1323/users```**
+** List: ```> http GET http://127.0.0.1:1323/users```**
 ```
 HTTP/1.1 200 OK
 Content-Length: 3
@@ -10,7 +10,7 @@ Date: Tue, 01 Sep 2020 21:08:47 GMT
 {}
 ```
 
-**```> http -f POST http://127.0.0.1:1323/users name='aaa' password='zaq1@WSX' email='aaa@bbb.ccc'```**
+** Create: ```> http -f POST http://127.0.0.1:1323/users name='aaa' password='zaq1@WSX' email='aaa@bbb.ccc'```**
 ```
 HTTP/1.1 201 Created
 Content-Length: 37

@@ -3,7 +3,6 @@ package main
 import (
     "github.com/go-playground/validator"
     "github.com/labstack/echo"
-    "github.com/labstack/echo-contrib/prometheus"
     "github.com/labstack/echo/middleware"
 )
 
@@ -23,13 +22,9 @@ func main() {
     // Validator
     e.Validator = &CustomValidator{validator: validator.New()}
 
-    // Prometheus
-    p := prometheus.NewPrometheus("echo", nil)
-    p.Use(e)
-
     e.GET("/users", listUserAccounts)
     e.POST("/users", createUserAccount)
-    e.GET("/users/:id", retrieveUserAccount)
+    e.GET("/users/:name", retrieveUserAccount)
     e.PUT("/users", updateUserAccount, middleware.KeyAuth(checkAuthToken))
     e.DELETE("/users", deleteUserAccount, middleware.KeyAuth(checkAuthToken))
 
@@ -51,4 +46,4 @@ func main() {
     e.Logger.Fatal(e.Start(":1323"))
 }
 
-// TODO: Tests and Swagger
+// TODO: Tests

@@ -16,11 +16,13 @@ services:
 
   app:
     build: app
+    command: run
     ports:
       - '1323:1323'
     depends_on:
       - postgres
       - redis
+    env_file: .env
 
 volumes:
 

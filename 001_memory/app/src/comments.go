@@ -33,18 +33,18 @@ var (
     commentsSeq = 1
 )
 
-func getCommentOrError(context echo.Context) (*comment, error) {
+func getCommentOrError(context echo.Context) (*comment, int) {
     id, err := strconv.Atoi(context.Param("id"))
     if err != nil {
-        return nil, context.NoContent(http.StatusBadRequest)
+        return nil, http.StatusBadRequest
     }
 
     comment, ok := comments[id]
     if !ok {
-        return nil, context.NoContent(http.StatusNotFound)
+        return nil, http.StatusNotFound
     }
 
-    return comment, nil
+    return comment, 0
 }
 
 func listComments(context echo.Context) error {
@@ -98,8 +98,8 @@ func createComment(context echo.Context) error {
 
 func retrieveComment(context echo.Context) error {
     comment, err := getCommentOrError(context)
-    if err != nil {
-        return err
+    if err != 0 {
+        return context.NoContent(err)
     }
 
     return context.JSON(http.StatusOK, comment)
@@ -109,8 +109,8 @@ func updateComment(context echo.Context) error {
     user := context.Get("user").(*user)
 
     comment, err := getCommentOrError(context)
-    if err != nil {
-        return err
+    if err != 0 {
+        return context.NoContent(err)
     }
 
     if comment.AuthorName != user.Name {
@@ -138,8 +138,8 @@ func deleteComment(context echo.Context) error {
     user := context.Get("user").(*user)
 
     comment, err := getCommentOrError(context)
-    if err != nil {
-        return err
+    if err != 0 {
+        return context.NoContent(err)
     }
 
     if comment.AuthorName != user.Name {

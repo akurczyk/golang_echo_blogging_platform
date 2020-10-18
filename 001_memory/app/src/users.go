@@ -29,15 +29,15 @@ var (
     users = map[string]*user{}
 )
 
-func getUserOrError(context echo.Context) (*user, error) {
-    id := context.Param("id")
+func getUserOrError(context echo.Context) (*user, int) {
+    name := context.Param("name")
 
-    user, ok := users[id]
+    user, ok := users[name]
     if !ok {
-        return nil, context.NoContent(http.StatusNotFound)
+        return nil, http.StatusNotFound
     }
 
-    return user, nil
+    return user, 0
 }
 
 func listUserAccounts(context echo.Context) error {
@@ -75,8 +75,8 @@ func createUserAccount(context echo.Context) error {
 
 func retrieveUserAccount(context echo.Context) error {
     user, err := getUserOrError(context)
-    if err != nil {
-        return err
+    if err != 0 {
+        return context.NoContent(err)
     }
 
     return context.JSON(http.StatusOK, user)

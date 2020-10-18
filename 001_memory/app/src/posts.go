@@ -29,18 +29,18 @@ var (
     postsSeq = 1
 )
 
-func getPostOrError(context echo.Context) (*post, error) {
+func getPostOrError(context echo.Context) (*post, int) {
     id, err := strconv.Atoi(context.Param("id"))
     if err != nil {
-        return nil, context.NoContent(http.StatusBadRequest)
+        return nil, http.StatusBadRequest
     }
 
     post, ok := posts[id]
     if !ok {
-        return nil, context.NoContent(http.StatusNotFound)
+        return nil, http.StatusNotFound
     }
 
-    return post, nil
+    return post, 0
 }
 
 func listPosts(context echo.Context) error {
@@ -86,8 +86,8 @@ func createPost(context echo.Context) error {
 
 func retrievePost(context echo.Context) error {
     post, err := getPostOrError(context)
-    if err != nil {
-        return err
+    if err != 0 {
+        return context.NoContent(err)
     }
 
     return context.JSON(http.StatusOK, post)
@@ -97,8 +97,8 @@ func updatePost(context echo.Context) error {
     user := context.Get("user").(*user)
 
     post, err := getPostOrError(context)
-    if err != nil {
-        return err
+    if err != 0 {
+        return context.NoContent(err)
     }
 
     if post.AuthorName != user.Name {
@@ -127,8 +127,8 @@ func deletePost(context echo.Context) error {
     user := context.Get("user").(*user)
 
     post, err := getPostOrError(context)
-    if err != nil {
-        return err
+    if err != 0 {
+        return context.NoContent(err)
     }
 
     if post.AuthorName != user.Name {

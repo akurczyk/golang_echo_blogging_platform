@@ -1,16 +1,19 @@
 package main
 
 import (
+    "context"
     "fmt"
-    _ "github.com/akurczyk/golang_echo_blogging_platform/002_postgres_and_redis/app/src/docs"
+    _ "github.com/akurczyk/golang_echo_blogging_platform/001_postgres_and_redis/app/src/docs"
     "github.com/go-playground/validator"
-    "github.com/labstack/echo"
+    "github.com/go-redis/redis/v8"
+    "github.com/labstack/echo/v4"
     "github.com/labstack/echo-contrib/prometheus"
-    "github.com/labstack/echo/middleware"
+    "github.com/labstack/echo/v4/middleware"
     "github.com/swaggo/echo-swagger"
     "gorm.io/driver/postgres"
     "gorm.io/gorm"
     "os"
+    "strconv"
 )
 
 type (
@@ -20,14 +23,16 @@ type (
 )
 
 var (
-    db *gorm.DB
+    sql_db   *gorm.DB
+    ctx      context.Context
+    redis_db *redis.Client
 )
 
 func (cv *CustomValidator) Validate(i interface{}) error {
     return cv.validator.Struct(i)
 }
 
-func setupDb() {
+func setupSql() {
     var err error
 
     host := os.Getenv("POSTGRES_HOST")
@@ -38,25 +43,40 @@ func setupDb() {
 
     template := "host=%v port=%v user=%v password=%v dbname=%v sslmode=disable"
     dsn := fmt.Sprintf(template, host, port, user, password, dbname)
-    db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+    sql_db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
     if err != nil {
         panic("Could not connect to database.")
     }
 
-    err = db.AutoMigrate(&Post{})
+    err = sql_db.AutoMigrate(&Post{})
     if err != nil {
         panic("Could not migrate posts.")
     }
 
-    err = db.AutoMigrate(&Comment{})
+    err = sql_db.AutoMigrate(&Comment{})
     if err != nil {
         panic("Could not migrate comments.")
     }
 
-    err = db.AutoMigrate(&User{})
+    err = sql_db.AutoMigrate(&User{})
     if err != nil {
         panic("Could not migrate users.")
     }
+}
+
+func setupRedis() {
+    host := os.Getenv("REDIS_HOST")
+    port := os.Getenv("REDIS_PORT")
+    password := os.Getenv("REDIS_PASSWORD")
+    db, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
+
+    ctx = context.Background()
+
+    redis_db = redis.NewClient(&redis.Options{
+        Addr:     fmt.Sprintf("%v:%v", host, port),
+        Password: password,
+        DB:       db,
+    })
 }
 
 // @title Simple blogging platform API based on PostgreSQL and Redis databases
@@ -73,7 +93,8 @@ func setupDb() {
 // @in header
 // @name Authorization
 func main() {
-    setupDb()
+    setupSql()
+    setupRedis()
 
     e := echo.New()
 
@@ -112,6 +133,3 @@ func main() {
 }
 
 // TODO: Tests
-// TODO: SET_NULL to Author
-// TODO: Redis
-// TODO: PostgreSQL start problem

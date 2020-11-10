@@ -1,7 +1,8 @@
 package main
 
 import (
-    "github.com/labstack/echo"
+    "github.com/labstack/echo/v4"
+    "gorm.io/gorm"
     "net/http"
     "strconv"
     "strings"
@@ -10,12 +11,13 @@ import (
 
 type (
     User struct {
-        ID           int       `json:"id" gorm:"primarykey"`
-        Name         string    `json:"name" gorm:"uniqueIndex"`
-        PasswordHash string    `json:"-"`
-        Email        string    `json:"email"`
-        CreateDate   time.Time `json:"create_date" gorm:"autoCreateTime"`
-        ModifyDate   time.Time `json:"modify_date" form:"autoUpdateTime"`
+        ID           uint           `json:"id" gorm:"primarykey"`
+        CreatedAt    time.Time      `json:"created_at"`
+        UpdatedAt    time.Time      `json:"updated_at"`
+        DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+        Name         string         `json:"name" gorm:"uniqueIndex;size:255"`
+        PasswordHash string         `json:"-" gorm:"size:255"`
+        Email        string         `json:"email" gorm:"uniqueIndex;size:255"`
     }
 
     UserNew struct {
@@ -127,11 +129,11 @@ func retrieveUserAccount(context echo.Context) error {
 }
 
 // updateUserAccount godoc
-// @Summary Update User Account
+// @Summary Update Current User Account
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param id path int true "ID"
+// @Security ApiKeyAuth
 // @Param user body UserUpdate true "User"
 // @Success 200 {object} User
 // @Failure 400
@@ -139,7 +141,7 @@ func retrieveUserAccount(context echo.Context) error {
 // @Failure 404
 // @Router /users [put]
 func updateUserAccount(context echo.Context) error {
-    user := context.Get("User").(*User)
+    user := context.Get("User").(User)
 
     userUpdate := new(UserUpdate)
 
@@ -164,25 +166,16 @@ func updateUserAccount(context echo.Context) error {
 }
 
 // deleteUserAccount godoc
-// @Summary Delete User Account
+// @Summary Delete Current User Account
 // @Tags users
-// @Param id path int true "ID"
+// @Security ApiKeyAuth
 // @Success 204
 // @Success 400
 // @Failure 403
 // @Failure 404
 // @Router /users [delete]
 func deleteUserAccount(context echo.Context) error {
-    user := context.Get("User").(*User)
-
-    id, err := strconv.Atoi(context.Param("id"))
-    if err != nil {
-        return context.NoContent(http.StatusBadRequest)
-    }
-
-    if id != user.ID {
-        return context.NoContent(http.StatusForbidden)
-    }
+    user := context.Get("User").(User)
 
     db.Delete(&user)
 

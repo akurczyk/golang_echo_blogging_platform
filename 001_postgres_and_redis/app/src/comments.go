@@ -1,7 +1,8 @@
 package main
 
 import (
-    "github.com/labstack/echo"
+    "github.com/labstack/echo/v4"
+    "gorm.io/gorm"
     "net/http"
     "strconv"
     "strings"
@@ -10,14 +11,15 @@ import (
 
 type (
     Comment struct {
-        ID         int       `json:"id" gorm:"primarykey"`
-        AuthorID   int       `json:"author_id"`
-        Author     User      `json:"author"`
-        PostID     int       `json:"post_id"`
-        Post       Post      `json:"post"`
-        Content    string    `json:"content"`
-        CreateDate time.Time `json:"create_date" gorm:"autoCreateTime"`
-        ModifyDate time.Time `json:"modify_date" form:"autoUpdateTime"`
+        ID           uint           `json:"id" gorm:"primarykey"`
+        CreatedAt    time.Time      `json:"created_at"`
+        UpdatedAt    time.Time      `json:"updated_at"`
+        DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
+        AuthorID     uint           `json:"author_id"`
+        Author       User           `json:"author"`
+        PostID       int            `json:"post_id"`
+        Post         Post           `json:"post"`
+        Content      string         `json:"content"`
     }
 
     CommentCreate struct {
@@ -75,12 +77,13 @@ func listComments(context echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param comment body CommentCreate true "Comment"
+// @Security ApiKeyAuth
 // @Success 201 {object} Comment
 // @Failure 400
 // @Failure 500
 // @Router /comments [post]
 func createComment(context echo.Context) error {
-    user := context.Get("User").(*User)
+    user := context.Get("User").(User)
 
     commentCreate := new(CommentCreate)
     post := new(Post)
@@ -99,11 +102,9 @@ func createComment(context echo.Context) error {
         return context.JSON(http.StatusBadRequest, "Provided post does not exists.")
     }
 
-    comment.AuthorID = user.ID
+    comment.Author = user
     comment.Post = *post
     comment.Content = commentCreate.Content
-    comment.CreateDate = time.Now()
-    comment.ModifyDate = time.Now()
     db.Create(&comment)
 
     return context.JSON(http.StatusCreated, comment)
@@ -134,13 +135,14 @@ func retrieveComment(context echo.Context) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Param comment body CommentUpdate true "Comment"
+// @Security ApiKeyAuth
 // @Success 200 {object} Comment
 // @Failure 400
 // @Failure 403
 // @Failure 404
 // @Router /comments/{id} [put]
 func updateComment(context echo.Context) error {
-    user := context.Get("User").(*User)
+    user := context.Get("User").(User)
 
     comment, err := getCommentOrError(context)
     if err != 0 {
@@ -162,7 +164,6 @@ func updateComment(context echo.Context) error {
     }
 
     comment.Content = commentUpdate.Content
-    comment.ModifyDate = time.Now()
     db.Save(&comment)
 
     return context.JSON(http.StatusOK, comment)
@@ -172,13 +173,14 @@ func updateComment(context echo.Context) error {
 // @Summary Delete Comment
 // @Tags comments
 // @Param id path int true "ID"
+// @Security ApiKeyAuth
 // @Success 204
 // @Failure 400
 // @Failure 403
 // @Failure 404
 // @Router /comments/{id} [delete]
 func deleteComment(context echo.Context) error {
-    user := context.Get("User").(*User)
+    user := context.Get("User").(User)
 
     comment, err := getCommentOrError(context)
     if err != 0 {

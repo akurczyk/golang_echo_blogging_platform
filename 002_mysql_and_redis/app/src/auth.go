@@ -1,14 +1,11 @@
 package main
 
 import (
-    "github.com/labstack/echo"
+    "encoding/json"
+    "github.com/labstack/echo/v4"
     "github.com/labstack/gommon/random"
     "golang.org/x/crypto/bcrypt"
     "net/http"
-)
-
-var (
-    tokens = map[string]User{}
 )
 
 func hashAndSalt(pwd string) (string, error) {
@@ -28,12 +25,23 @@ func comparePasswords(hashedPwd string, plainPwd string) bool {
 }
 
 func checkAuthToken(token string, context echo.Context) (bool, error) {
-    if _, ok := tokens[token]; !ok {
+    var user_obj User
+    var user_json string
+    var err error
+
+    user_json, err = redis_db.Get(ctx, token).Result()
+    if err != nil {
         return false, nil
     }
 
+    err = json.Unmarshal([]byte(user_json), &user_obj)
+    if err != nil {
+        panic(err)
+    }
+
     context.Set("token", token)
-    context.Set("User", tokens[token])
+    context.Set("User", user_obj)
+
     return true, nil
 }
 
@@ -49,19 +57,30 @@ func checkAuthToken(token string, context echo.Context) (bool, error) {
 // @Failure 500
 // @Router /token [post]
 func issueAuthToken(context echo.Context) error {
-    var user User
+    var user_obj User
+    var user_json []byte
+    var err error
 
-    result := db.First(&user, context.FormValue("name"))
+    result := sql_db.First(&user_obj, "Name = ?", context.FormValue("name"))
     if result.Error != nil {
         return context.NoContent(http.StatusUnauthorized)
     }
 
-    if !comparePasswords(user.PasswordHash, context.FormValue("password")) {
+    if !comparePasswords(user_obj.PasswordHash, context.FormValue("password")) {
         return context.NoContent(http.StatusUnauthorized)
     }
 
     token := random.String(32, random.Alphanumeric)
-    tokens[token] = user
+
+    user_json, err = json.Marshal(user_obj)
+    if err != nil {
+        panic(err)
+    }
+
+    err = redis_db.Set(ctx, token, string(user_json), 0).Err()
+    if err != nil {
+        panic(err)
+    }
 
     return context.String(http.StatusCreated, token)
 }
@@ -69,10 +88,11 @@ func issueAuthToken(context echo.Context) error {
 // revokeAuthToken godoc
 // @Summary Revoke Auth Token / Logout Current User
 // @Tags auth
+// @Security ApiKeyAuth
 // @Success 204
 // @Router /token [delete]
 func revokeAuthToken(context echo.Context) error {
     token := context.Get("token").(string)
-    delete(tokens, token)
+    redis_db.Del(ctx, token)
     return context.NoContent(http.StatusNoContent)
 }

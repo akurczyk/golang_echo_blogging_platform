@@ -1,7 +1,8 @@
 package main
 
 import (
-    "github.com/labstack/echo"
+    "github.com/labstack/echo/v4"
+    "gorm.io/gorm"
     "net/http"
     "strconv"
     "strings"
@@ -10,13 +11,14 @@ import (
 
 type (
     Post struct {
-        ID         int       `json:"id" gorm:"primarykey"`
-        AuthorID   int       `json:"author_id"`
-        Author     User      `json:"author"`
-        Title      string    `json:"title"`
-        Content    string    `json:"content"`
-        CreateDate time.Time `json:"create_date" gorm:"autoCreateTime"`
-        ModifyDate time.Time `json:"modify_date" form:"autoUpdateTime"`
+        ID         uint           `json:"id" gorm:"primarykey"`
+        CreatedAt  time.Time      `json:"created_at"`
+        UpdatedAt  time.Time      `json:"updated_at"`
+        DeletedAt  gorm.DeletedAt `json:"-" gorm:"index"`
+        AuthorID   uint           `json:"author_id"`
+        Author     User           `json:"author"`
+        Title      string         `json:"title" gorm:"size:255"`
+        Content    string         `json:"content"`
     }
 
     PostIn struct {
@@ -66,12 +68,13 @@ func listPosts(context echo.Context) error {
 // @Accept json
 // @Produce json
 // @Param post body PostIn true "Post"
+// @Security ApiKeyAuth
 // @Success 201 {object} Post
 // @Failure 400
 // @Failure 500
 // @Router /posts [post]
 func createPost(context echo.Context) error {
-    user := context.Get("User").(*User)
+    user := context.Get("User").(User)
 
     post := new(Post)
     postIn := new(PostIn)
@@ -84,7 +87,7 @@ func createPost(context echo.Context) error {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
 
-    post.AuthorID = user.ID
+    post.Author = user
     post.Title = postIn.Title
     post.Content = postIn.Content
 
@@ -121,13 +124,14 @@ func retrievePost(context echo.Context) error {
 // @Produce json
 // @Param id path int true "ID"
 // @Param post body PostIn true "Post"
+// @Security ApiKeyAuth
 // @Success 200 {object} Post
 // @Failure 400
 // @Failure 403
 // @Failure 404
 // @Router /posts/{id} [put]
 func updatePost(context echo.Context) error {
-    user := context.Get("User").(*User)
+    user := context.Get("User").(User)
 
     post, err := getPostOrError(context)
     if err != 0 {
@@ -159,13 +163,14 @@ func updatePost(context echo.Context) error {
 // @Summary Delete Post
 // @Tags posts
 // @Param id path int true "ID"
+// @Security ApiKeyAuth
 // @Success 204
 // @Failure 400
 // @Failure 403
 // @Failure 404
 // @Router /posts/{id} [delete]
 func deletePost(context echo.Context) error {
-    user := context.Get("User").(*User)
+    user := context.Get("User").(User)
 
     post, err := getPostOrError(context)
     if err != 0 {

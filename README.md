@@ -4,27 +4,7 @@ Golang Echo blogging platform
 Technologies
 ------------
 
-<img src="https://img.shields.io/static/v1?label=&message=Docker&color=0db7ed&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Docker-compose&color=888888&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Golang&color=29beb0&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Echo%20framework&color=41ddfd&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=GORM&color=3f424a&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=PostgreSQL&color=0064a5&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=MySQL&color=4479a1&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Redis&color=d82c20&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=MongoDB*&color=3fa037&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Cassandra*&color=b2e3f9&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=ScyllaDB*&color=24d5f2&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Prometheus&color=e6522c&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Swagger&color=38b832&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Kubernetes*&color=2064dd&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Helm*&color=2064dd&style=flat" height="30"/>
-
-<img src="https://img.shields.io/static/v1?label=&message=Docker&color=99E7FF&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Docker-compose&color=E6E6E6&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Golang&color=99FFF5&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=Echo%20framework&color=99EEFF&style=flat" height="30"/> 
-<img src="https://img.shields.io/static/v1?label=&message=GORM&color=3F424A&style=flat" height="30"/> 
+<img src="https://img.shields.io/static/v1?label=&message=Docker&color=99E7FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Docker-compose&color=E6E6E6&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Golang&color=99FFF5&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Echo%20framework&color=99EEFF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=GORM&color=CCCCCC&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=PostgreSQL&color=99D6FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=MySQL&color=99D3FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Redis&color=FFA099&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=MongoDB*&color=A2FF99&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Cassandra*&color=99DFFF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=ScyllaDB*&color=99F1FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Prometheus&color=FFAD99&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Swagger&color=9EFF99&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Kubernetes*&color=99BEFF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Helm*&color=99BEFF&style=flat" height="30"/>
 
 \* – will be added in the future.
 

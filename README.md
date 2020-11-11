@@ -22,12 +22,12 @@ Description
 A group of snippet projects made with Golang, Echo framework, and multiple libraries and databases (SQL and NoSQL)
 providing an API backend allowing users to register, login, and write posts and comments.
 
-Each of these projects is Dockerized with the multi-stage build and unprivileged user execution in the final image. In the
+Each of these projects is Dockerized with the multi-stage build and unprivileged user execution in the final image. In
 the future addition of Kubernetes Helm charts is planned.
 
-To run a single project, execute `docker-compose up` in the project directory and go to http://127.0.0.1:1323/. Swagger with
-API reference will be available at http://127.0.0.1:1323/swagger/index.html. Prometheus metrics will be accessible at
-http://127.0.0.1:1323/metrics.
+To run a single project, execute `docker-compose up` in the project directory and go to http://127.0.0.1:1323/. Swagger
+with API reference will be available at http://127.0.0.1:1323/swagger/index.html. Prometheus metrics will be accessible
+at http://127.0.0.1:1323/metrics.
 
 Authorization
 -------------
@@ -36,8 +36,8 @@ Most of the endpoints require an authorization, for projects 001, 002, and 999 â
 `Bearer<space>`, and for projects from 003 to 005 â€“ with JWT token.
 
 To obtain the bearer token, issue a POST request to `/token` endpoint with form-encoded values of user's `name` and
-`password` gathered by creating the user with POST request to `/user` endpoint. An example of these transactions has been
-shown in the API reference in 999 directory.
+`password` gathered by creating the user with POST request to `/user` endpoint. An example of these transactions has
+been shown in the API reference in 999 directory.
 
 Versions
 --------

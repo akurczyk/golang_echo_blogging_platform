@@ -79,10 +79,10 @@ func setupRedis() {
     })
 }
 
-// @title Simple blogging platform API based on PostgreSQL and Redis databases
+// @title Simple blogging platform API based on MySQL and Redis databases
 // @version 1.0
 // @description Simple blogging platform API created in Golang with the use of Echo framework, GORM ORM library,
-// @description PostgreSQL database for storing objects, and Redis for storing session data with integrated Prometheus
+// @description MySQL database for storing objects, and Redis for storing session data with integrated Prometheus
 // @description and Swagger dockerized.
 
 // @contact.name Aleksander Kurczyk

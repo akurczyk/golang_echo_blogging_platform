@@ -55,4 +55,4 @@ TODO
 
 - Write tests
 - Add Helm charts
-- Add Cassandra and Scylla flavors
+- Add Cassandra and Scylla flavours

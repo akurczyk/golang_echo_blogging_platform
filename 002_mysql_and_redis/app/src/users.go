@@ -40,7 +40,7 @@ func getUserOrError(context echo.Context) (*User, int) {
         return nil, http.StatusBadRequest
     }
 
-    result := sql_db.First(&user, id)
+    result := sqlClient.First(&user, id)
     if result.Error != nil {
         return nil, http.StatusNotFound
     }
@@ -59,7 +59,7 @@ func getUserOrError(context echo.Context) (*User, int) {
 func listUserAccounts(context echo.Context) error {
     var users []User
 
-    query := sql_db
+    query := sqlClient
     if name := context.QueryParam("name"); name != "" {
         query = query.Where("Name = ?", name)
     }
@@ -82,13 +82,10 @@ func listUserAccounts(context echo.Context) error {
 // @Failure 500
 // @Router /users [post]
 func createUserAccount(context echo.Context) error {
-    user := new(User)
     userNew := new(UserNew)
-
     if err := context.Bind(userNew); err != nil {
         return err
     }
-
     if err := context.Validate(userNew); err != nil {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
@@ -98,11 +95,12 @@ func createUserAccount(context echo.Context) error {
         return err
     }
 
+    user := new(User)
     user.Name = userNew.Name
     user.PasswordHash = hashedPassword
     user.Email = userNew.Email
 
-    result := sql_db.Create(&user)
+    result := sqlClient.Create(&user)
     if result.Error != nil {
         return context.JSON(http.StatusBadRequest, "User with provided name already exists.")
     }
@@ -137,18 +135,15 @@ func retrieveUserAccount(context echo.Context) error {
 // @Param user body UserUpdate true "User"
 // @Success 200 {object} User
 // @Failure 400
+// @Failure 401
 // @Failure 403
 // @Failure 404
 // @Router /users [put]
 func updateUserAccount(context echo.Context) error {
-    user := context.Get("User").(User)
-
     userUpdate := new(UserUpdate)
-
     if err := context.Bind(userUpdate); err != nil {
         return err
     }
-
     if err := context.Validate(userUpdate); err != nil {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
@@ -158,9 +153,10 @@ func updateUserAccount(context echo.Context) error {
         return err
     }
 
+    user := context.Get("User").(User)
     user.PasswordHash = hashedPassword
     user.Email = userUpdate.Email
-    sql_db.Save(&user)
+    sqlClient.Save(&user)
 
     return context.JSON(http.StatusOK, user)
 }
@@ -170,14 +166,14 @@ func updateUserAccount(context echo.Context) error {
 // @Tags users
 // @Security ApiKeyAuth
 // @Success 204
-// @Success 400
-// @Failure 403
-// @Failure 404
+// @Failure 401
 // @Router /users [delete]
 func deleteUserAccount(context echo.Context) error {
     user := context.Get("User").(User)
 
-    sql_db.Delete(&user)
+    sqlClient.Delete(&user)
+
+    // TODO: Delete user sessions here
 
     return context.NoContent(http.StatusNoContent)
 }

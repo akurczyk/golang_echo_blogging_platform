@@ -4,6 +4,7 @@ import (
     "encoding/json"
     "github.com/labstack/echo/v4"
     "github.com/labstack/gommon/random"
+    "go.mongodb.org/mongo-driver/bson"
     "golang.org/x/crypto/bcrypt"
     "net/http"
     "time"
@@ -64,8 +65,10 @@ func issueAuthToken(context echo.Context) error {
     var userJson []byte
     var err error
 
-    result := sqlClient.First(&userObj, "Name = ?", context.FormValue("name"))
-    if result.Error != nil {
+    name := context.FormValue("name")
+    filter := bson.D{{"name", name}}
+    err = mongoDatabase.Collection("users").FindOne(mongoCtx, filter).Decode(&userObj)
+    if err != nil {
         return context.NoContent(http.StatusUnauthorized)
     }
 
@@ -80,7 +83,7 @@ func issueAuthToken(context echo.Context) error {
         panic(err)
     }
 
-    err = redisClient.Set(redisCtx, token, string(userJson), 0).Err()
+    err = redisClient.Set(redisCtx, token, string(userJson), 1 * time.Hour).Err()
     if err != nil {
         panic(err)
     }

@@ -23,9 +23,9 @@ type (
 )
 
 var (
-    sql_db   *gorm.DB
-    ctx      context.Context
-    redis_db *redis.Client
+    sqlClient   *gorm.DB
+    redisCtx    context.Context
+    redisClient *redis.Client
 )
 
 func (cv *CustomValidator) Validate(i interface{}) error {
@@ -43,22 +43,22 @@ func setupSql() {
 
     template := "%v:%v@tcp(%v:%v)/%v?charset=utf8mb4&parseTime=True&loc=Local"
     dsn := fmt.Sprintf(template, user, password, host, port, dbname)
-    sql_db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+    sqlClient, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
     if err != nil {
         panic("Could not connect to database.")
     }
 
-    err = sql_db.AutoMigrate(&Post{})
+    err = sqlClient.AutoMigrate(&Post{})
     if err != nil {
         panic("Could not migrate posts.")
     }
 
-    err = sql_db.AutoMigrate(&Comment{})
+    err = sqlClient.AutoMigrate(&Comment{})
     if err != nil {
         panic("Could not migrate comments.")
     }
 
-    err = sql_db.AutoMigrate(&User{})
+    err = sqlClient.AutoMigrate(&User{})
     if err != nil {
         panic("Could not migrate users.")
     }
@@ -70,9 +70,9 @@ func setupRedis() {
     password := os.Getenv("REDIS_PASSWORD")
     db, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
 
-    ctx = context.Background()
+    redisCtx = context.Background()
 
-    redis_db = redis.NewClient(&redis.Options{
+    redisClient = redis.NewClient(&redis.Options{
         Addr:     fmt.Sprintf("%v:%v", host, port),
         Password: password,
         DB:       db,
@@ -83,7 +83,7 @@ func setupRedis() {
 // @version 1.0
 // @description Simple blogging platform API created in Golang with the use of Echo framework, GORM ORM library,
 // @description MySQL database for storing objects, and Redis for storing session data with integrated Prometheus
-// @description and Swagger dockerized.
+// @description and Swagger, Dockerized.
 
 // @contact.name Aleksander Kurczyk
 // @contact.url http://github.com/akurczyk

@@ -35,7 +35,7 @@ func getPostOrError(context echo.Context) (*Post, int) {
         return nil, http.StatusBadRequest
     }
 
-    result := sql_db.First(&post, id)
+    result := sqlClient.First(&post, id)
     if result.Error != nil {
         return nil, http.StatusNotFound
     }
@@ -53,7 +53,7 @@ func getPostOrError(context echo.Context) (*Post, int) {
 func listPosts(context echo.Context) error {
     var posts []Post
 
-    query := sql_db
+    query := sqlClient
     if authorID := context.QueryParam("author_id"); authorID != "" {
         query = query.Where("AuthorID = ?", authorID)
     }
@@ -71,27 +71,24 @@ func listPosts(context echo.Context) error {
 // @Security ApiKeyAuth
 // @Success 201 {object} Post
 // @Failure 400
+// @Failure 401
 // @Failure 500
 // @Router /posts [post]
 func createPost(context echo.Context) error {
-    user := context.Get("User").(User)
-
-    post := new(Post)
     postIn := new(PostIn)
-
     if err := context.Bind(postIn); err != nil {
         return err
     }
-
     if err := context.Validate(postIn); err != nil {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
 
-    post.Author = user
+    post := new(Post)
+    post.Author = context.Get("User").(User)
     post.Title = postIn.Title
     post.Content = postIn.Content
 
-    result := sql_db.Create(&post)
+    result := sqlClient.Create(&post)
     if result.Error != nil {
         return result.Error
     }
@@ -127,34 +124,31 @@ func retrievePost(context echo.Context) error {
 // @Security ApiKeyAuth
 // @Success 200 {object} Post
 // @Failure 400
+// @Failure 401
 // @Failure 403
 // @Failure 404
 // @Router /posts/{id} [put]
 func updatePost(context echo.Context) error {
-    user := context.Get("User").(User)
-
     post, err := getPostOrError(context)
     if err != 0 {
         return context.NoContent(err)
     }
 
-    if post.AuthorID != user.ID {
+    if post.AuthorID != context.Get("User").(User).ID {
         return context.NoContent(http.StatusForbidden)
     }
 
     postIn := new(PostIn)
-
     if err := context.Bind(postIn); err != nil {
         return err
     }
-
     if err := context.Validate(postIn); err != nil {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
 
     post.Title = postIn.Title
     post.Content = postIn.Content
-    sql_db.Save(&post)
+    sqlClient.Save(&post)
 
     return context.JSON(http.StatusOK, post)
 }
@@ -166,22 +160,21 @@ func updatePost(context echo.Context) error {
 // @Security ApiKeyAuth
 // @Success 204
 // @Failure 400
+// @Failure 401
 // @Failure 403
 // @Failure 404
 // @Router /posts/{id} [delete]
 func deletePost(context echo.Context) error {
-    user := context.Get("User").(User)
-
     post, err := getPostOrError(context)
     if err != 0 {
         return context.NoContent(err)
     }
 
-    if post.AuthorID != user.ID {
+    if post.AuthorID != context.Get("User").(User).ID {
         return context.NoContent(http.StatusForbidden)
     }
 
-    sql_db.Delete(&post)
+    sqlClient.Delete(&post)
 
     return context.NoContent(http.StatusNoContent)
 }

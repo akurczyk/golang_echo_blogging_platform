@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+
+  mongo:
+    image: mongo:3.6.21-xenial
+    volumes:
+      - mongo_data:/data/db
+    env_file: .env
+
+  redis:
+    image: redis:6.0.6-alpine
+    volumes:
+      - redis_data:/data
+    env_file: .env
+
+  app:
+    build: app
+    command: run
+    ports:
+      - '1323:1323'
+    depends_on:
+      - mongo
+      - redis
+    env_file: .env
+
+volumes:
+
+  mongo_data:
+  redis_data:

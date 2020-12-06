@@ -2,22 +2,21 @@ package main
 
 import (
     "github.com/labstack/echo/v4"
-    "gorm.io/gorm"
+    "go.mongodb.org/mongo-driver/bson"
+    "go.mongodb.org/mongo-driver/bson/primitive"
     "net/http"
-    "strconv"
     "strings"
     "time"
 )
 
 type (
     User struct {
-        ID           uint           `json:"id" gorm:"primarykey"`
-        CreatedAt    time.Time      `json:"created_at"`
-        UpdatedAt    time.Time      `json:"updated_at"`
-        DeletedAt    gorm.DeletedAt `json:"-" gorm:"index"`
-        Name         string         `json:"name" gorm:"uniqueIndex;size:255"`
-        PasswordHash string         `json:"-" gorm:"size:255"`
-        Email        string         `json:"email" gorm:"uniqueIndex;size:255"`
+        ID           primitive.ObjectID `bson:"_id" json:"_id"`
+        CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
+        UpdatedAt    time.Time          `bson:"updated_at" json:"updated_at"`
+        Name         string             `bson:"name" json:"name"`
+        PasswordHash string             `bson:"password_hash" json:"-"`
+        Email        string             `bson:"email" json:"email"`
     }
 
     UserNew struct {
@@ -33,15 +32,20 @@ type (
 )
 
 func getUserOrError(context echo.Context) (*User, int) {
+    var err error
+    var id primitive.ObjectID
     var user User
 
-    id, err := strconv.Atoi(context.Param("id"))
+    id, err = primitive.ObjectIDFromHex(context.Param("id"))
     if err != nil {
         return nil, http.StatusBadRequest
     }
 
-    result := sqlClient.First(&user, id)
-    if result.Error != nil {
+    filter := bson.M{
+        "_id": id,
+    }
+    err = usersCollection.FindOne(mongoCtx, filter).Decode(&user)
+    if err != nil {
         return nil, http.StatusNotFound
     }
 
@@ -58,15 +62,43 @@ func getUserOrError(context echo.Context) (*User, int) {
 // @Router /users [get]
 func listUserAccounts(context echo.Context) error {
     var users []User
+    var filters []bson.M
+    var filter bson.M
 
-    query := sqlClient
     if name := context.QueryParam("name"); name != "" {
-        query = query.Where("Name = ?", name)
+        filters = append(filters, bson.M{
+            "name": name,
+        })
     }
     if email := context.QueryParam("email"); email != "" {
-        query = query.Where("Email = ?", email)
+        filters = append(filters, bson.M{
+            "email": email,
+        })
     }
-    query.Find(&users)
+    if len(filters) > 0 {
+        filter = bson.M{
+            "$and": filters,
+        }
+    } else {
+        filter = bson.M{}
+    }
+
+    cursor, err := usersCollection.Find(mongoCtx, filter)
+    if err != nil {
+        panic(err)
+    }
+    defer cursor.Close(mongoCtx)
+
+    for cursor.Next(mongoCtx) {
+        var user User
+
+        err := cursor.Decode(&user)
+        if err != nil {
+            panic(err)
+        }
+
+        users = append(users, user)
+    }
 
     return context.JSON(http.StatusOK, users)
 }
@@ -79,14 +111,17 @@ func listUserAccounts(context echo.Context) error {
 // @Param user body UserNew true "User"
 // @Success 201 {object} User
 // @Failure 400
+// @Failure 401
 // @Failure 500
 // @Router /users [post]
 func createUserAccount(context echo.Context) error {
+    var err error
+
     userNew := new(UserNew)
-    if err := context.Bind(userNew); err != nil {
+    if err = context.Bind(userNew); err != nil {
         return err
     }
-    if err := context.Validate(userNew); err != nil {
+    if err = context.Validate(userNew); err != nil {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
 
@@ -96,13 +131,19 @@ func createUserAccount(context echo.Context) error {
     }
 
     user := new(User)
+    user.ID = primitive.NewObjectID()
+    user.CreatedAt = time.Now()
+    user.UpdatedAt = time.Now()
     user.Name = userNew.Name
     user.PasswordHash = hashedPassword
     user.Email = userNew.Email
 
-    result := sqlClient.Create(&user)
-    if result.Error != nil {
-        return context.JSON(http.StatusBadRequest, "User with provided name already exists.")
+    _, err = usersCollection.InsertOne(mongoCtx, user)
+    if err != nil {
+        if strings.Contains(err.Error(), "Duplicate key error.") {
+            return context.JSON(http.StatusBadRequest, "User with provided name or email already exists.")
+        }
+        panic(err)
     }
 
     return context.JSON(http.StatusCreated, user)
@@ -112,7 +153,7 @@ func createUserAccount(context echo.Context) error {
 // @Summary Retrieve User Account
 // @Tags users
 // @Produce json
-// @Param id path int true "ID"
+// @Param id path string true "ID"
 // @Success 200 {object} User
 // @Failure 400
 // @Failure 404
@@ -135,7 +176,6 @@ func retrieveUserAccount(context echo.Context) error {
 // @Param user body UserUpdate true "User"
 // @Success 200 {object} User
 // @Failure 400
-// @Failure 401
 // @Failure 403
 // @Failure 404
 // @Router /users [put]
@@ -156,7 +196,17 @@ func updateUserAccount(context echo.Context) error {
     user := context.Get("User").(User)
     user.PasswordHash = hashedPassword
     user.Email = userUpdate.Email
-    sqlClient.Save(&user)
+
+    filter := bson.M{
+        "_id": user.ID,
+    }
+    update := bson.M{
+        "$set": user,
+    }
+    _, err = usersCollection.UpdateOne(mongoCtx, filter, update)
+    if err != nil {
+        panic(err)
+    }
 
     return context.JSON(http.StatusOK, user)
 }
@@ -166,12 +216,18 @@ func updateUserAccount(context echo.Context) error {
 // @Tags users
 // @Security ApiKeyAuth
 // @Success 204
-// @Failure 401
+// @Success 401
 // @Router /users [delete]
 func deleteUserAccount(context echo.Context) error {
     user := context.Get("User").(User)
 
-    sqlClient.Delete(&user)
+    filter := bson.M{
+        "_id": user.ID,
+    }
+    _, err := usersCollection.DeleteOne(mongoCtx, filter)
+    if err != nil {
+        panic(err)
+    }
 
     // TODO: Delete user sessions here
 

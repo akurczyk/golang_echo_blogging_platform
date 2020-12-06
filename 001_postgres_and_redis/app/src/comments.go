@@ -40,7 +40,7 @@ func getCommentOrError(context echo.Context) (*Comment, int) {
         return nil, http.StatusBadRequest
     }
 
-    result := db.First(&comment, id)
+    result := sqlClient.First(&comment, id)
     if result.Error != nil {
         return nil, http.StatusNotFound
     }
@@ -59,7 +59,7 @@ func getCommentOrError(context echo.Context) (*Comment, int) {
 func listComments(context echo.Context) error {
     var comments []Comment
 
-    query := db
+    query := sqlClient
     if authorID := context.QueryParam("author_id"); authorID != "" {
         query = query.Where("AuthorID = ?", authorID)
     }
@@ -80,32 +80,29 @@ func listComments(context echo.Context) error {
 // @Security ApiKeyAuth
 // @Success 201 {object} Comment
 // @Failure 400
+// @Failure 401
 // @Failure 500
 // @Router /comments [post]
 func createComment(context echo.Context) error {
-    user := context.Get("User").(User)
-
     commentCreate := new(CommentCreate)
-    post := new(Post)
-    comment := new(Comment)
-
     if err := context.Bind(commentCreate); err != nil {
         return err
     }
-
     if err := context.Validate(commentCreate); err != nil {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
 
-    result := db.First(&post, commentCreate.PostID)
+    post := new(Post)
+    result := sqlClient.First(&post, commentCreate.PostID)
     if result.Error != nil {
         return context.JSON(http.StatusBadRequest, "Provided post does not exists.")
     }
 
-    comment.Author = user
+    comment := new(Comment)
+    comment.Author = context.Get("User").(User)
     comment.Post = *post
     comment.Content = commentCreate.Content
-    db.Create(&comment)
+    sqlClient.Create(&comment)
 
     return context.JSON(http.StatusCreated, comment)
 }
@@ -138,33 +135,30 @@ func retrieveComment(context echo.Context) error {
 // @Security ApiKeyAuth
 // @Success 200 {object} Comment
 // @Failure 400
+// @Failure 401
 // @Failure 403
 // @Failure 404
 // @Router /comments/{id} [put]
 func updateComment(context echo.Context) error {
-    user := context.Get("User").(User)
-
     comment, err := getCommentOrError(context)
     if err != 0 {
         return context.NoContent(err)
     }
 
-    if comment.AuthorID != user.ID {
+    if comment.AuthorID != context.Get("User").(User).ID {
         return context.NoContent(http.StatusForbidden)
     }
 
     commentUpdate := new(CommentUpdate)
-
     if err := context.Bind(commentUpdate); err != nil {
         return err
     }
-
     if err := context.Validate(commentUpdate); err != nil {
         return context.JSON(http.StatusBadRequest, strings.Split(err.Error(), "\n"))
     }
 
     comment.Content = commentUpdate.Content
-    db.Save(&comment)
+    sqlClient.Save(&comment)
 
     return context.JSON(http.StatusOK, comment)
 }
@@ -176,22 +170,21 @@ func updateComment(context echo.Context) error {
 // @Security ApiKeyAuth
 // @Success 204
 // @Failure 400
+// @Failure 401
 // @Failure 403
 // @Failure 404
 // @Router /comments/{id} [delete]
 func deleteComment(context echo.Context) error {
-    user := context.Get("User").(User)
-
     comment, err := getCommentOrError(context)
     if err != 0 {
         return context.NoContent(err)
     }
 
-    if comment.AuthorID != user.ID {
+    if comment.AuthorID != context.Get("User").(User).ID {
         return context.NoContent(http.StatusForbidden)
     }
 
-    db.Delete(&comment)
+    sqlClient.Delete(&comment)
 
     return context.NoContent(http.StatusNoContent)
 }

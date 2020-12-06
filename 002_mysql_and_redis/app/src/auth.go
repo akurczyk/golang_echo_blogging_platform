@@ -6,6 +6,7 @@ import (
     "github.com/labstack/gommon/random"
     "golang.org/x/crypto/bcrypt"
     "net/http"
+    "time"
 )
 
 func hashAndSalt(pwd string) (string, error) {
@@ -25,22 +26,24 @@ func comparePasswords(hashedPwd string, plainPwd string) bool {
 }
 
 func checkAuthToken(token string, context echo.Context) (bool, error) {
-    var user_obj User
-    var user_json string
+    var userObj User
+    var userJson string
     var err error
 
-    user_json, err = redis_db.Get(ctx, token).Result()
+    userJson, err = redisClient.Get(redisCtx, token).Result()
     if err != nil {
         return false, nil
     }
 
-    err = json.Unmarshal([]byte(user_json), &user_obj)
+    _ = redisClient.Expire(redisCtx, token, 1 * time.Hour).Err()
+
+    err = json.Unmarshal([]byte(userJson), &userObj)
     if err != nil {
         panic(err)
     }
 
     context.Set("token", token)
-    context.Set("User", user_obj)
+    context.Set("User", userObj)
 
     return true, nil
 }
@@ -57,27 +60,27 @@ func checkAuthToken(token string, context echo.Context) (bool, error) {
 // @Failure 500
 // @Router /token [post]
 func issueAuthToken(context echo.Context) error {
-    var user_obj User
-    var user_json []byte
+    var userObj User
+    var userJson []byte
     var err error
 
-    result := sql_db.First(&user_obj, "Name = ?", context.FormValue("name"))
+    result := sqlClient.First(&userObj, "Name = ?", context.FormValue("name"))
     if result.Error != nil {
         return context.NoContent(http.StatusUnauthorized)
     }
 
-    if !comparePasswords(user_obj.PasswordHash, context.FormValue("password")) {
+    if !comparePasswords(userObj.PasswordHash, context.FormValue("password")) {
         return context.NoContent(http.StatusUnauthorized)
     }
 
     token := random.String(32, random.Alphanumeric)
 
-    user_json, err = json.Marshal(user_obj)
+    userJson, err = json.Marshal(userObj)
     if err != nil {
         panic(err)
     }
 
-    err = redis_db.Set(ctx, token, string(user_json), 0).Err()
+    err = redisClient.Set(redisCtx, token, string(userJson), 0).Err()
     if err != nil {
         panic(err)
     }
@@ -93,6 +96,6 @@ func issueAuthToken(context echo.Context) error {
 // @Router /token [delete]
 func revokeAuthToken(context echo.Context) error {
     token := context.Get("token").(string)
-    redis_db.Del(ctx, token)
+    redisClient.Del(redisCtx, token)
     return context.NoContent(http.StatusNoContent)
 }

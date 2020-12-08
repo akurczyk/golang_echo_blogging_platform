@@ -61,10 +61,10 @@ func listUserAccounts(context echo.Context) error {
 
     query := sqlClient
     if name := context.QueryParam("name"); name != "" {
-        query = query.Where("Name = ?", name)
+        query = query.Where("name = ?", name)
     }
     if email := context.QueryParam("email"); email != "" {
-        query = query.Where("Email = ?", email)
+        query = query.Where("email = ?", email)
     }
     query.Find(&users)
 
@@ -173,7 +173,7 @@ func deleteUserAccount(context echo.Context) error {
 
     sqlClient.Delete(&user)
 
-    // TODO: Delete user sessions here
+    // TODO: Delete user sessions here or during session retrieval once upon a time
 
     return context.NoContent(http.StatusNoContent)
 }

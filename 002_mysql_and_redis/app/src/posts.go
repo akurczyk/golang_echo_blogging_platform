@@ -35,7 +35,7 @@ func getPostOrError(context echo.Context) (*Post, int) {
         return nil, http.StatusBadRequest
     }
 
-    result := sqlClient.First(&post, id)
+    result := sqlClient.Preload("Author").First(&post, id)
     if result.Error != nil {
         return nil, http.StatusNotFound
     }
@@ -55,9 +55,9 @@ func listPosts(context echo.Context) error {
 
     query := sqlClient
     if authorID := context.QueryParam("author_id"); authorID != "" {
-        query = query.Where("AuthorID = ?", authorID)
+        query = query.Where("author_id = ?", authorID)
     }
-    query.Find(&posts)
+    query.Preload("Author").Find(&posts)
 
     return context.JSON(http.StatusOK, posts)
 }

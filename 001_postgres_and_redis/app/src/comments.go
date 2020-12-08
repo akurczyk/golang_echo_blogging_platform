@@ -1,6 +1,7 @@
 package main
 
 import (
+    "fmt"
     "github.com/labstack/echo/v4"
     "gorm.io/gorm"
     "net/http"
@@ -40,7 +41,7 @@ func getCommentOrError(context echo.Context) (*Comment, int) {
         return nil, http.StatusBadRequest
     }
 
-    result := sqlClient.First(&comment, id)
+    result := sqlClient.Preload("Author").Preload("Post").Preload("Post.Author").First(&comment, id)
     if result.Error != nil {
         return nil, http.StatusNotFound
     }
@@ -61,12 +62,13 @@ func listComments(context echo.Context) error {
 
     query := sqlClient
     if authorID := context.QueryParam("author_id"); authorID != "" {
-        query = query.Where("AuthorID = ?", authorID)
+        query = query.Where("author_id = ?", authorID)
+        fmt.Println(authorID)
     }
     if postID := context.QueryParam("post_id"); postID != "" {
-        query = query.Where("PostID = ?", postID)
+        query = query.Where("post_id = ?", postID)
     }
-    query.Find(&comments)
+    query.Preload("Author").Preload("Post").Preload("Post.Author").Find(&comments)
 
     return context.JSON(http.StatusOK, comments)
 }

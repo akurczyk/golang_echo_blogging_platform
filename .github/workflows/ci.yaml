@@ -28,7 +28,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./001_postgres_and_redis/app/
-          file: ./Dockerfile
+          file: ./001_postgres_and_redis/app/Dockerfile
           push: true
           tags: akurczyk/blogging_platform:001_postgres_and_redis-latest
 
@@ -36,7 +36,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./002_mysql_and_redis/app/
-          file: ./Dockerfile
+          file: ./002_mysql_and_redis/app/Dockerfile
           push: true
           tags: akurczyk/blogging_platform:002_mysql_and_redis-latest
 
@@ -44,6 +44,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./003_mongo_and_redis/app/
-          file: ./Dockerfile
+          file: ./003_mongo_and_redis/app/Dockerfile
           push: true
           tags: akurczyk/blogging_platform:003_mongo_and_redis-latest

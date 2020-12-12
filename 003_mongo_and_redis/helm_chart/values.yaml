@@ -1,0 +1,58 @@
+replicaCount: 1
+
+image:
+  repository: akurczyk/blogging_platform
+  pullPolicy: Always
+  tag: 003_mongo_and_redis-latest
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 1323
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts: []
+  tls: []
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+mongodb:
+  architecture: replicaset
+  auth:
+    username: blogging-platform
+    database: blogging-platform
+  replicaCount: 3
+  arbiter:
+    enabled: false
+
+redis:
+  cluster:
+    enabled: true
+  #sentinel:
+  #  enabled: true

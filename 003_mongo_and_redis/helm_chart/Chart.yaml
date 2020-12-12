@@ -1,0 +1,14 @@
+apiVersion: v2
+name: blogging-platform
+description: Blogging Platform written with Golang, Echo, MongoDB, and Redis
+type: application
+version: 0.1.0
+appVersion: 0.1.0
+
+dependencies:
+  - name: mongodb
+    version: 10.2.0
+    repository: https://charts.bitnami.com/bitnami
+  - name: redis
+    version: 12.2.1
+    repository: https://charts.bitnami.com/bitnami

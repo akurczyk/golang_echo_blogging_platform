@@ -2,7 +2,6 @@ package main
 
 import (
     "context"
-    "fmt"
     _ "github.com/akurczyk/golang_echo_blogging_platform/003_mongo_and_redis/app/src/docs"
     "github.com/go-playground/validator"
     "github.com/go-redis/redis/v8"
@@ -44,15 +43,13 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 func setupMongo() {
     var err error
 
-    host := os.Getenv("MONGO_HOST")
-    port := os.Getenv("MONGO_PORT")
-    username := os.Getenv("MONGO_INITDB_ROOT_USERNAME")
-    password := os.Getenv("MONGO_INITDB_ROOT_PASSWORD")
-    database := os.Getenv("MONGO_DATABASE")
+    connection_string := os.Getenv("BP_MONGO_CONNECTION_STRING")
+    username := os.Getenv("BP_MONGO_USERNAME")
+    password := os.Getenv("BP_MONGO_PASSWORD")
+    database := os.Getenv("BP_MONGO_DATABASE")
 
-    uri := fmt.Sprintf("mongodb://%v:%v", host, port)
     credential := options.Credential{Username: username, Password: password}
-    clientOptions := options.Client().ApplyURI(uri).SetAuth(credential)
+    clientOptions := options.Client().ApplyURI(connection_string).SetAuth(credential)
 
     // Create context - a timeout can be specified here
     mongoCtx = context.Background()
@@ -106,15 +103,14 @@ func setupMongo() {
 }
 
 func setupRedis() {
-    host := os.Getenv("REDIS_HOST")
-    port := os.Getenv("REDIS_PORT")
-    password := os.Getenv("REDIS_PASSWORD")
-    db, _ := strconv.Atoi(os.Getenv("REDIS_DB"))
+    connection_string := os.Getenv("BP_REDIS_CONNECTION_STRING")
+    password := os.Getenv("BP_REDIS_PASSWORD")
+    db, _ := strconv.Atoi(os.Getenv("BP_REDIS_DB"))
 
     redisCtx = context.Background()
 
     redisClient = redis.NewClient(&redis.Options{
-        Addr:     fmt.Sprintf("%v:%v", host, port),
+        Addr:     connection_string,
         Password: password,
         DB:       db,
     })

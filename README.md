@@ -8,7 +8,7 @@ Technologies
 
 <img src="https://img.shields.io/static/v1?label=&message=Golang&color=99FFF5&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Echo%20framework&color=99EEFF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=GORM&color=CCCCCC&style=flat" height="30"/>
 
-<img src="https://img.shields.io/static/v1?label=&message=PostgreSQL&color=99D6FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=MySQL&color=99D3FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Redis&color=FFA099&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=MongoDB*&color=A2FF99&style=flat" height="30"/>
+<img src="https://img.shields.io/static/v1?label=&message=PostgreSQL&color=99D6FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=MySQL&color=99D3FF&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Redis&color=FFA099&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=MongoDB&color=A2FF99&style=flat" height="30"/>
 
 <img src="https://img.shields.io/static/v1?label=&message=Prometheus&color=FFAD99&style=flat" height="30"/> <img src="https://img.shields.io/static/v1?label=&message=Swagger&color=9EFF99&style=flat" height="30"/>
 

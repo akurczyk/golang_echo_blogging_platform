@@ -73,7 +73,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "helm_chart.fullname" . }}
-                  key: mongodb-post-to-check
+                  key: mongodb-port-to-check
             - name: BP_REDIS_HOST_TO_CHECK
               valueFrom:
                 secretKeyRef:
@@ -83,7 +83,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ include "helm_chart.fullname" . }}
-                  key: redis-post-to-check
+                  key: redis-port-to-check
           command:
             - ./entrypoint.sh
             - run

@@ -12,7 +12,8 @@ fi
 
 case $@ in
   "run")
-    ./wait-for-it.sh $MONGO_HOST:$MONGO_PORT -t 600
+    ./wait-for-it.sh $BP_MONGO_HOST_TO_CHECK:$BP_MONGO_PORT_TO_CHECK -t 600
+    ./wait-for-it.sh $BP_REDIS_HOST_TO_CHECK:$BP_REDIS_PORT_TO_CHECK -t 600
     ./main
     ;;
   *)

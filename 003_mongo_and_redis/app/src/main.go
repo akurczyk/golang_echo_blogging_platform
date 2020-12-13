@@ -169,4 +169,4 @@ func main() {
 // TODO: Add pagination
 // TODO: Write tests
 // TODO: Auto update of authors of posts and comments during update of users
-// TODO: Add Helm template with Redis and Mongo
+// TODO: Add Sentinel support for Redis

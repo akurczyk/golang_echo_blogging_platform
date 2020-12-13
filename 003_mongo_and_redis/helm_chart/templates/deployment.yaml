@@ -64,6 +64,26 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-redis
                   key: redis-password
+            - name: BP_MONGO_HOST_TO_CHECK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helm_chart.fullname" . }}
+                  key: mongodb-host-to-check
+            - name: BP_MONGO_PORT_TO_CHECK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helm_chart.fullname" . }}
+                  key: mongodb-post-to-check
+            - name: BP_REDIS_HOST_TO_CHECK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helm_chart.fullname" . }}
+                  key: redis-host-to-check
+            - name: BP_REDIS_PORT_TO_CHECK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helm_chart.fullname" . }}
+                  key: redis-post-to-check
           command:
             - ./entrypoint.sh
             - run
@@ -71,14 +91,14 @@ spec:
             - name: http
               containerPort: 1323
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          #livenessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
+          #readinessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

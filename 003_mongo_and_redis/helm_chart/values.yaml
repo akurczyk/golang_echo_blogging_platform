@@ -50,9 +50,3 @@ mongodb:
   replicaCount: 3
   arbiter:
     enabled: false
-
-redis:
-  cluster:
-    enabled: true
-  #sentinel:
-  #  enabled: true

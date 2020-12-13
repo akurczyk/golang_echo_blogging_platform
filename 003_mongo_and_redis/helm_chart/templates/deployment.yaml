@@ -34,6 +34,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
+            - name: BP_MONGO_SERVICE_TO_CHECK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helm_chart.fullname" . }}
+                  key: mongodb-service-to-check
             - name: BP_MONGO_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
@@ -54,6 +59,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "helm_chart.fullname" . }}
                   key: mongodb-database
+            - name: BP_REDIS_SERVICE_TO_CHECK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "helm_chart.fullname" . }}
+                  key: redis-service-to-check
             - name: BP_REDIS_CONNECTION_STRING
               valueFrom:
                 secretKeyRef:
@@ -64,26 +74,6 @@ spec:
                 secretKeyRef:
                   name: {{ .Release.Name }}-redis
                   key: redis-password
-            - name: BP_MONGO_HOST_TO_CHECK
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "helm_chart.fullname" . }}
-                  key: mongodb-host-to-check
-            - name: BP_MONGO_PORT_TO_CHECK
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "helm_chart.fullname" . }}
-                  key: mongodb-port-to-check
-            - name: BP_REDIS_HOST_TO_CHECK
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "helm_chart.fullname" . }}
-                  key: redis-host-to-check
-            - name: BP_REDIS_PORT_TO_CHECK
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "helm_chart.fullname" . }}
-                  key: redis-port-to-check
           command:
             - ./entrypoint.sh
             - run
@@ -91,14 +81,14 @@ spec:
             - name: http
               containerPort: 1323
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          #livenessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
+          #readinessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

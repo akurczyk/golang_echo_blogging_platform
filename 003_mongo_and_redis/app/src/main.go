@@ -43,13 +43,13 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 func setupMongo() {
     var err error
 
-    connection_string := os.Getenv("BP_MONGO_CONNECTION_STRING")
+    connectionString := os.Getenv("BP_MONGO_CONNECTION_STRING")
     username := os.Getenv("BP_MONGO_USERNAME")
     password := os.Getenv("BP_MONGO_PASSWORD")
     database := os.Getenv("BP_MONGO_DATABASE")
 
     credential := options.Credential{Username: username, Password: password}
-    clientOptions := options.Client().ApplyURI(connection_string).SetAuth(credential)
+    clientOptions := options.Client().ApplyURI(connectionString).SetAuth(credential)
 
     // Create context - a timeout can be specified here
     mongoCtx = context.Background()
@@ -61,10 +61,10 @@ func setupMongo() {
     }
 
     // Check connection
-    //err = mongoClient.Ping(context.TODO(), nil)
-    //if err != nil {
-    //    panic(err)
-    //}
+    err = mongoClient.Ping(context.TODO(), nil)
+    if err != nil {
+        panic(err)
+    }
 
     // Create database handle
     mongoDatabase = mongoClient.Database(database)
@@ -103,14 +103,14 @@ func setupMongo() {
 }
 
 func setupRedis() {
-    connection_string := os.Getenv("BP_REDIS_CONNECTION_STRING")
+    connectionString := os.Getenv("BP_REDIS_CONNECTION_STRING")
     password := os.Getenv("BP_REDIS_PASSWORD")
-    db, _ := strconv.Atoi(os.Getenv("BP_REDIS_DB"))
+    db, _ := strconv.Atoi(os.Getenv("BP_REDIS_DATABASE"))
 
     redisCtx = context.Background()
 
     redisClient = redis.NewClient(&redis.Options{
-        Addr:     connection_string,
+        Addr:     connectionString,
         Password: password,
         DB:       db,
     })
@@ -170,3 +170,4 @@ func main() {
 // TODO: Write tests
 // TODO: Auto update of authors of posts and comments during update of users
 // TODO: Add Sentinel support for Redis
+// TODO: Add read from slave support for Redis

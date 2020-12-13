@@ -44,9 +44,11 @@ affinity: {}
 
 mongodb:
   architecture: replicaset
-  auth:
-    username: blogging-platform
-    database: blogging-platform
   replicaCount: 3
+  auth:
+    rootPassword: aaa
+    username: aaa
+    password: aaa
+    database: aaa
   arbiter:
     enabled: false

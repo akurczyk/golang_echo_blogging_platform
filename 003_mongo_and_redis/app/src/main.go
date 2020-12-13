@@ -61,10 +61,10 @@ func setupMongo() {
     }
 
     // Check connection
-    err = mongoClient.Ping(context.TODO(), nil)
-    if err != nil {
-        panic(err)
-    }
+    //err = mongoClient.Ping(context.TODO(), nil)
+    //if err != nil {
+    //    panic(err)
+    //}
 
     // Create database handle
     mongoDatabase = mongoClient.Database(database)

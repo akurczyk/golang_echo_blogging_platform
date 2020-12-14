@@ -12,7 +12,6 @@ fi
 
 case $@ in
   "run")
-    env
     ./wait-for-it.sh $BP_MONGO_SERVICE_TO_CHECK -t 600
     ./wait-for-it.sh $BP_REDIS_SERVICE_TO_CHECK -t 600
     ./main

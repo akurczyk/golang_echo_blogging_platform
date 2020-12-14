@@ -15,6 +15,7 @@ import (
     "go.mongodb.org/mongo-driver/mongo/readconcern"
     "go.mongodb.org/mongo-driver/mongo/readpref"
     "go.mongodb.org/mongo-driver/mongo/writeconcern"
+    "net/http"
     "os"
     "strconv"
     "time"
@@ -162,6 +163,10 @@ func main() {
     e.POST("/posts/:post_id/comments", createComment, middleware.KeyAuth(checkAuthToken))
     e.PUT("/posts/:post_id/comments/:comment_id", updateComment, middleware.KeyAuth(checkAuthToken))
     e.DELETE("/posts/:post_id/comments/:comment_id", deleteComment, middleware.KeyAuth(checkAuthToken))
+
+    e.GET("/alive", func(c echo.Context) error {
+        return c.NoContent(http.StatusOK)
+    })
 
     e.Logger.Fatal(e.Start(":1323"))
 }

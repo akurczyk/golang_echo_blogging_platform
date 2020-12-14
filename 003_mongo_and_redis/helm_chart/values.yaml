@@ -1,3 +1,5 @@
+clusterDomain: cluster.local
+
 replicaCount: 1
 
 image:
@@ -45,10 +47,5 @@ affinity: {}
 mongodb:
   architecture: replicaset
   replicaCount: 3
-  auth:
-    rootPassword: aaa
-    username: aaa
-    password: aaa
-    database: aaa
   arbiter:
     enabled: false
